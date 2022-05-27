@@ -4,11 +4,11 @@ from .FaceRecognition import CamPolice
 def home(request):
     return render(request, "index.html")
 
+
 def start_cam(request):
-    CamPolice.detect_faces()
+    CamPolice().detect_faces()
     return render(request, "index.html")
 
 
-
-
-
+def about(request):
+    return render(request, "about.html")
