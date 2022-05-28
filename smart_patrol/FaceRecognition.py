@@ -1,107 +1,149 @@
 from .models import Person
+from keras.models import load_model
+import tensorflow as tf
 import cv2
 import face_recognition
 import numpy as np
+import requests
+from datetime import datetime
+import environ
+import yagmail
+from .PreprocessVideo import Preprocess
 
 class CamPolice:
-    def __init__(self):
-        self.name = "Unknown"
+    def __init__(self, file):
+        self.name = "0"
+        self.video_file = file
+        self.threshold = 50
+        self.max_frames = 60
 
-    def detect_faces(self):
-        video_capture = cv2.VideoCapture(0)
+    
+    def detect_violence(self, video):
+        model = load_model('keras_model.h5', compile=False)
+        is_fight = model.predict(np.asarray([video]))[0][0] * 100
+        return is_fight
+    
+    def message(self, is_known, face_names):
+        if is_known:
+            self.mail_authorities([self.fetch_offender_details(face_name) for face_name in face_names])
+            
 
-        me_image = face_recognition.load_image_file("faces_db/Sristi.jpg")
-        me_face_encoding = face_recognition.face_encodings(me_image)[0]
+
+    def find_faces(self, small_frames, known_face_encodings, known_face_names):
+        is_known_face = False
+        for rgb_small_frame in small_frames:
+            # Find all the faces and face encodings in the current frame of video
+            face_locations = face_recognition.face_locations(rgb_small_frame)
+            face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations)
+
+            face_names = set()
+            for face_encoding in face_encodings:
+                # See if the face is a match for the known face(s)
+                matches = face_recognition.compare_faces(known_face_encodings, face_encoding)
+                self.name = "0"
+
+                # Or instead, use the known face with the smallest distance to the new face
+                face_distances = face_recognition.face_distance(known_face_encodings, face_encoding)
+                best_match_index = np.argmin(face_distances)
+                if matches[best_match_index]:
+                    self.name = known_face_names[best_match_index]
+                    is_known_face = True
+                face_names.add(self.name)
+        self.message(is_known_face, face_names)
+        
+
+    def process_video(self):
+        video_capture = cv2.VideoCapture(self.video_file)
+
 
         holland_image = face_recognition.load_image_file("faces_db/Tom_h.jpg")
         holland_face_encoding = face_recognition.face_encodings(holland_image)[0]
 
+        tobey_image = face_recognition.load_image_file("faces_db/Tobey.png")
+        tobey_face_encoding = face_recognition.face_encodings(tobey_image)[0]
 
         known_face_encodings = [
-            me_face_encoding,
             holland_face_encoding,
+            tobey_face_encoding
    
         ]
         known_face_names = [
-            "1",
             "2",
+            "3"
         ]
 
         # Initialize some variables
         face_locations = []
         face_encodings = []
-        face_names = []
-        process_this_frame = True
+        frames = []
 
-        while True:
+        small_frames = []
+        can_analyze = False
+        f_count = 0
+
+        while video_capture.isOpened():
             # Grab a single frame of video
             ret, frame = video_capture.read()
+            if ret:
+                frame_for_v = cv2.resize(frame, (224,224), interpolation=cv2.INTER_AREA)
+                frame_for_v = cv2.cvtColor(frame_for_v, cv2.COLOR_BGR2RGB)
+                frame_for_v = np.reshape(frame_for_v, (224,224,3))
+                frames.append(frame_for_v)
+                f_count += 1
+                if f_count >= self.max_frames:
+                    frames = np.array(frames)
+                    can_analyze = True
+                # Resize frame of video to 1/4 size for faster face recognition processing
+                small_frame = cv2.resize(frame, (0, 0), fx=0.25, fy=0.25)
+                # Convert the image from BGR color (which OpenCV uses) to RGB color (which face_recognition uses)
+                rgb_small_frame = small_frame[:, :, ::-1]
+                small_frames.append(rgb_small_frame)
 
-            # Resize frame of video to 1/4 size for faster face recognition processing
-            small_frame = cv2.resize(frame, (0, 0), fx=0.25, fy=0.25)
+                if can_analyze:
+                    if self.detect_violence(Preprocess(self.video_file).prepare_data(frames)) >= self.threshold:
+                        self.find_faces(small_frames, known_face_encodings, known_face_names)
+                    can_analyze = False
+                    frames = []
+                    f_count = 0
+                    small_frames = []
+                   
+                # Display the resulting image
+                cv2.imshow('Video', frame)
 
-            # Convert the image from BGR color (which OpenCV uses) to RGB color (which face_recognition uses)
-            rgb_small_frame = small_frame[:, :, ::-1]
-
-            # Only process every other frame of video to save time
-            if process_this_frame:
-                # Find all the faces and face encodings in the current frame of video
-                face_locations = face_recognition.face_locations(rgb_small_frame)
-                face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations)
-
-                face_names = []
-                for face_encoding in face_encodings:
-                    # See if the face is a match for the known face(s)
-                    matches = face_recognition.compare_faces(known_face_encodings, face_encoding)
-                    self.name = "Unknown"
-
-
-                    # Or instead, use the known face with the smallest distance to the new face
-                    face_distances = face_recognition.face_distance(known_face_encodings, face_encoding)
-                    best_match_index = np.argmin(face_distances)
-                    if matches[best_match_index]:
-                        self.name = known_face_names[best_match_index]
-
-                    face_names.append(self.name)
-                    #disease_info = fetch details(id)
-                    # return diseas_info
-                    self.mail_authorities(self.fetch_offender_details(self.name))
-            process_this_frame = not process_this_frame
-
-            
-
-            # Display the results
-            for (top, right, bottom, left), self.name in zip(face_locations, face_names):
-                # Scale back up face locations since the frame we detected in was scaled to 1/4 size
-                top *= 4
-                right *= 4
-                bottom *= 4
-                left *= 4
-
-                # Draw a box around the face
-                cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
-
-                # Draw a label with a name below the face
-                cv2.rectangle(frame, (left, bottom - 35), (right, bottom), (0, 0, 255), cv2.FILLED)
-                font = cv2.FONT_HERSHEY_DUPLEX
-                cv2.putText(frame, self.name, (left + 6, bottom - 6), font, 1.0, (255, 255, 255), 1)
-
-            # Display the resulting image
-            cv2.imshow('Video', frame)
-
-            # Hit 'q' on the keyboard to quit!
-            if cv2.waitKey(1) & 0xFF == ord('q'):
+                # Hit 'q' on the keyboard to quit!
+                if cv2.waitKey(1) & 0xFF == ord('q'):
+                    break
+            else:
                 break
-
         # Release handle to the webcam
         video_capture.release()
         cv2.destroyAllWindows()
 
+
     def fetch_offender_details(self, aadhar_id: str):
         persons = Person.objects.filter(aadhar_id=aadhar_id)
         return [(person.name, person.aadhar_id, person.address) for person in persons]
-    
+
+
+    def get_location(self):
+        location = requests.get("https://ipinfo.io/").json()
+        city = location["city"]
+        state = location["region"]
+        lattitude, longitude = location["loc"].split(",")
+        return city, state, lattitude, longitude
+
+
     def mail_authorities(self, offender_details: list):
-        print(offender_details)
+        area = self.get_location()
+        message = f"A violent incident was observed in the area: {area} where the following offenders were involved: {offender_details}"
+        print(message)
+        env = environ.Env()
+        environ.Env.read_env()
+        email = env("email")
+        # initiating connection with SMTP server
+        yag = yagmail.SMTP(email, env("psw"))
+        yag.send(email,f"{datetime.today()}: Violence Report from {area[0]}", message)
+        
+       
 
     
