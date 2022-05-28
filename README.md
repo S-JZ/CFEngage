@@ -12,6 +12,7 @@ __A violence detection module that can inform authorities about the details of i
 - HTML/CSS/JS
 - pywhatkit
 - yagmail
+- git
 
 ## How to set up the application?
 - Clone the GitHub repository
@@ -74,14 +75,19 @@ psw     #password of gmail account
 phone   #police whatsapp number 
 ```
 
+__Note: It is recommended to use <=360p video files for better performance. You can use the fight2.mp4 file for testing, added in the parent directory of the repository.__
+
 ## Demo Video Link:
 
 
 ## Design Documentation
+The following document contains the data flow diagram and a simple tech stack diagram to showcase the architecture of the application.
 
+https://drive.google.com/file/d/19JpzCP7GyJ2c99iSULUZXBurs0b19f6V/view?usp=sharing
 
 ## Weekly Reports: Sprints
 The file contains the weekly targets and milestones that I worked on throughout the month of May 2022 for the project. These weekly sprints include researching about different tech-stacks, implementing code, reviewing design and testing the application in each iteration.
+
 https://drive.google.com/file/d/1bYgDNUZsmWq3-vn1qwqlIk9FR0pBzR5B/view?usp=sharing
 
 ## Future Scope:
