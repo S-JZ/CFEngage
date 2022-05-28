@@ -1,6 +1,6 @@
+from asyncio import wait_for
 from .models import Person
 from keras.models import load_model
-import tensorflow as tf
 import cv2
 import face_recognition
 import numpy as np
@@ -9,6 +9,9 @@ from datetime import datetime
 import environ
 import yagmail
 import pywhatkit as kit
+import pyautogui as pg
+import time
+from platform import system
 from .PreprocessVideo import Preprocess
 
 class CamPolice:
@@ -30,17 +33,18 @@ class CamPolice:
         if is_known and mail:
             self.mail_authorities([self.fetch_offender_details(face_name) for face_name in face_names])
         elif is_known:
+            print(face_names)
             self.whatsapp_authorities([self.fetch_offender_details(face_name) for face_name in face_names])
             
 
     def find_faces(self, small_frames, known_face_encodings, known_face_names):
         is_known_face = False
+        face_names = set()
         for rgb_small_frame in small_frames:
             # Find all the faces and face encodings in the current frame of video
             face_locations = face_recognition.face_locations(rgb_small_frame)
             face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations)
 
-            face_names = set()
             for face_encoding in face_encodings:
                 # See if the face is a match for the known face(s)
                 matches = face_recognition.compare_faces(known_face_encodings, face_encoding)
@@ -49,8 +53,8 @@ class CamPolice:
                 best_match_index = np.argmin(face_distances)
                 if matches[best_match_index]:
                     self.name = known_face_names[best_match_index]
+                    face_names.add(self.name)
                     is_known_face = True
-                face_names.add(self.name)
         self.message(is_known_face, face_names, mail=False)
         
 
@@ -145,7 +149,26 @@ class CamPolice:
         env = environ.Env()
         environ.Env.read_env()
         message = f"A violent incident was observed in the area: {self.area} where the following offenders were involved: {offender_details}"
-        kit.sendwhatmsg_instantly(env("phone"), message, tab_close=True)
+        kit.sendwhatmsg_instantly(env("phone"), message)
+        pg.press("tab")
+        time.sleep(1)
+        pg.keyDown('shift')
+        pg.press("tab")
+        pg.keyUp('shift')
+        time.sleep(1)
+    
+        """ At this point, the cursor prompt should be in the text box.  Pressing
+        the ENTER key will cause the message to be sent
+        """
+        pg.press("enter")
+        time.sleep(1)
+        if system().lower() in ("windows", "linux"):
+            pg.hotkey("ctrl", "w")
+        elif system().lower() == "darwin":
+            pg.hotkey("command", "w")
+        else:
+            raise Warning(f"{system().lower()} not supported!")
+       
         
         
        
