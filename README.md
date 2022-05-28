@@ -75,7 +75,9 @@ psw     #password of gmail account
 phone   #police whatsapp number 
 ```
 
-__Note: It is recommended to use <=360p video files for better performance. You can use the fight2.mp4 file for testing, added in the parent directory of the repository.__
+__Note:__
+- _Ensure that you are logged in to the web whatsapp on the browser before uploading the video for processing._
+- _It is recommended to use <=360p video files for better performance. You can use the fight2.mp4 file for testing, added in the parent directory of the repository._
 
 ## Demo Video Link:
 
