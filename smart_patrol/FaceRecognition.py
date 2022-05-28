@@ -8,6 +8,7 @@ import requests
 from datetime import datetime
 import environ
 import yagmail
+import pywhatkit as kit
 from .PreprocessVideo import Preprocess
 
 class CamPolice:
@@ -16,6 +17,7 @@ class CamPolice:
         self.video_file = file
         self.threshold = 50
         self.max_frames = 60
+        self.area = self.get_location()
 
     
     def detect_violence(self, video):
@@ -23,11 +25,13 @@ class CamPolice:
         is_fight = model.predict(np.asarray([video]))[0][0] * 100
         return is_fight
     
-    def message(self, is_known, face_names):
-        if is_known:
-            self.mail_authorities([self.fetch_offender_details(face_name) for face_name in face_names])
-            
 
+    def message(self, is_known, face_names, mail=True):
+        if is_known and mail:
+            self.mail_authorities([self.fetch_offender_details(face_name) for face_name in face_names])
+        elif is_known:
+            self.whatsapp_authorities([self.fetch_offender_details(face_name) for face_name in face_names])
+            
 
     def find_faces(self, small_frames, known_face_encodings, known_face_names):
         is_known_face = False
@@ -40,8 +44,6 @@ class CamPolice:
             for face_encoding in face_encodings:
                 # See if the face is a match for the known face(s)
                 matches = face_recognition.compare_faces(known_face_encodings, face_encoding)
-                self.name = "0"
-
                 # Or instead, use the known face with the smallest distance to the new face
                 face_distances = face_recognition.face_distance(known_face_encodings, face_encoding)
                 best_match_index = np.argmin(face_distances)
@@ -49,7 +51,7 @@ class CamPolice:
                     self.name = known_face_names[best_match_index]
                     is_known_face = True
                 face_names.add(self.name)
-        self.message(is_known_face, face_names)
+        self.message(is_known_face, face_names, mail=False)
         
 
     def process_video(self):
@@ -73,10 +75,7 @@ class CamPolice:
         ]
 
         # Initialize some variables
-        face_locations = []
-        face_encodings = []
         frames = []
-
         small_frames = []
         can_analyze = False
         f_count = 0
@@ -134,15 +133,20 @@ class CamPolice:
 
 
     def mail_authorities(self, offender_details: list):
-        area = self.get_location()
-        message = f"A violent incident was observed in the area: {area} where the following offenders were involved: {offender_details}"
-        print(message)
+        message = f"A violent incident was observed in the area: {self.area} where the following offenders were involved: {offender_details}"
         env = environ.Env()
         environ.Env.read_env()
-        email = env("email")
         # initiating connection with SMTP server
-        yag = yagmail.SMTP(email, env("psw"))
-        yag.send(email,f"{datetime.today()}: Violence Report from {area[0]}", message)
+        yag = yagmail.SMTP(env("email"), env("psw"))
+        yag.send(env("email"),f"{datetime.today()}: Violence Report from {self.area[0]}", message)
+    
+
+    def whatsapp_authorities(self, offender_details):
+        env = environ.Env()
+        environ.Env.read_env()
+        message = f"A violent incident was observed in the area: {self.area} where the following offenders were involved: {offender_details}"
+        kit.sendwhatmsg_instantly(env("phone"), message, tab_close=True)
+        
         
        
 
