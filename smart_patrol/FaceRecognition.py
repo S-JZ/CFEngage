@@ -1,4 +1,4 @@
-from asyncio import wait_for
+import os
 from .models import Person
 from keras.models import load_model
 import cv2
@@ -21,6 +21,26 @@ class CamPolice:
         self.threshold = 50
         self.max_frames = 60
         self.area = self.get_location()
+        self.KNOWN_FACES_DIR = 'faces_db'
+
+    
+    def encode_faces(self):
+        # Each subfolder's name becomes our label (name)
+        known_faces = []
+        known_names = []
+        for name in os.listdir(self.KNOWN_FACES_DIR):
+            # Next we load every file of faces of known person
+            # Load an image
+            image = face_recognition.load_image_file(f'{self.KNOWN_FACES_DIR}/{name}')
+
+            # Get 128-dimension face encoding
+            # Always returns a list of found faces, for this purpose we take first face only (assuming one face per image as you can't be twice on one image)
+            encoding = face_recognition.face_encodings(image)[0]
+
+            # Append encodings and name
+            known_faces.append(encoding)
+            known_names.append(name[:-4])
+        return known_faces, known_names
 
     
     def detect_violence(self, video):
@@ -60,23 +80,7 @@ class CamPolice:
 
     def process_video(self):
         video_capture = cv2.VideoCapture(self.video_file)
-
-
-        holland_image = face_recognition.load_image_file("faces_db/Tom_h.jpg")
-        holland_face_encoding = face_recognition.face_encodings(holland_image)[0]
-
-        tobey_image = face_recognition.load_image_file("faces_db/Tobey.png")
-        tobey_face_encoding = face_recognition.face_encodings(tobey_image)[0]
-
-        known_face_encodings = [
-            holland_face_encoding,
-            tobey_face_encoding
-   
-        ]
-        known_face_names = [
-            "2",
-            "3"
-        ]
+        known_face_encodings, known_face_names = self.encode_faces()
 
         # Initialize some variables
         frames = []
