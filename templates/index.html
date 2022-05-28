@@ -9,7 +9,7 @@
       <div class="container">
 
         <div class="row">
-          <div class="col-lg-6 col-md-6 d-flex align-items-stretch">
+          {% comment %} <div class="col-lg-6 col-md-6 d-flex align-items-stretch">
             <div class="card">
               <a href="{% url 'cam' %}"> <img src=  "{% static "assets/img/cam.jpg" %}" class="card-img-top" alt="..."></a>
               <div class="card-icon">
@@ -20,20 +20,23 @@
                 <p class="card-text">Lorem ipsum dolor sit amet, consectetur elit, sed do eiusmod tempor ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. </p>
               </div>
             </div>
-          </div>
-         
+          </div> {% endcomment %}
+
+          <form method="post" action="{% url 'cam' %}" enctype="multipart/form-data">
+          {% csrf_token %}
           <div class="col-lg-6 col-md-6 d-flex align-items-stretch">
             <div class="card">
-              <img src="{% static "assets/img/upload.jpg" %}" class="card-img-top" alt="...">
+              <input type="file" name="file" autocomplete="off" required> <img src="{% static "assets/img/upload.jpg" %}" class="card-img-top" alt="...">
               <div class="card-icon">
                 <i class="bx bx-landscape"></i>
               </div>
               <div class="card-body">
-                <h5 class="card-title"><a href="">Upload Video</a></h5>
+                <input type="submit"> <h5 class="card-title"><a href="">Upload Video</a></h5>
                 <p class="card-text">Nemo enim ipsam voluptatem quia voluptas sit aut odit aut fugit, sed quia magni dolores eos qui ratione voluptatem sequi nesciunt Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet. </p>
               </div>
             </div>
           </div>
+        </form>
         </div>
 
       </div>
