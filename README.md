@@ -70,13 +70,15 @@ DB_USER            # database username
 DB_PSW             # database password
 DATABASE_URL       # localhost
 DEVELOPMENT_MODE   #set to True
-email   #gmail id for sending mail to authorities
-psw     #password of gmail account
-phone   #police whatsapp number 
+email    #own gmail id for sending mail to authorities
+psw      #password of gmail account
+polemail #police authorities email id (create a dummy one or supply own)
+phone    #police whatsapp number 
 ```
 
 __Note:__
 - _Ensure that you are logged in to the web whatsapp on the browser before uploading the video for processing._
+- _The mailing feature is by default not activated, if you wish to use it, make sure to [enable less secure apps settings](https://myaccount.google.com/lesssecureapps?pli=1&rapt=AEjHL4NIUzGaty2lXUpn1VY1vONVBfZnKI6vdx873ivXre2XPBNwFaenn3Ml6Gq4s1aHu3QLdDBxEBIbrxTrGMY8MMgQuTF5OQ) in your gmail account and set mail=True in the message function in smart_patrol/FaceRecognition.py file._
 - _It is recommended to use <=360p video files for better performance. You can use the fight2.mp4 file for testing, added in the parent directory of the repository._
 
 ## Demo Video Link:
