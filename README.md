@@ -78,21 +78,23 @@ phone    #police whatsapp number
 
 __Note:__
 - _Ensure that you are logged in to the web whatsapp on the browser before uploading the video for processing._
-- _The mailing feature is by default not activated, if you wish to use it, make sure to [enable less secure apps settings](https://myaccount.google.com/lesssecureapps?pli=1&rapt=AEjHL4NIUzGaty2lXUpn1VY1vONVBfZnKI6vdx873ivXre2XPBNwFaenn3Ml6Gq4s1aHu3QLdDBxEBIbrxTrGMY8MMgQuTF5OQ) in your gmail account and set mail=True in the message function in smart_patrol/FaceRecognition.py file._
-- _It is recommended to use <=360p video files for better performance. You can use the fight2.mp4 file for testing, added in the parent directory of the repository._
+- _The mailing feature is by default not activated, if you wish to use it, make sure to [enable less secure apps settings](https://myaccount.google.com/lesssecureapps?pli=1&rapt=AEjHL4NIUzGaty2lXUpn1VY1vONVBfZnKI6vdx873ivXre2XPBNwFaenn3Ml6Gq4s1aHu3QLdDBxEBIbrxTrGMY8MMgQuTF5OQ) in your gmail account and set mail=True in the message function call in smart_patrol/FaceRecognition.py file._
+- _It is recommended to use <=360p video files for better performance. You can use the [fight2.mp4](https://github.com/S-JZ/CFEngage/blob/main/fight2.mp4) file for testing, added in the parent directory of the repository._
 
 ## Demo Video Link:
-
+The demo video is at: [Microsoft Engage 2022 Demo Video](https://youtu.be/HKsSUQHaM8g)
 
 ## Design Documentation
 The following document contains the data flow diagram and a simple tech stack diagram to showcase the architecture of the application.
 
-https://drive.google.com/file/d/19JpzCP7GyJ2c99iSULUZXBurs0b19f6V/view?usp=sharing
+- [Design Document](https://drive.google.com/file/d/19JpzCP7GyJ2c99iSULUZXBurs0b19f6V/view?usp=sharing)
 
 ## Weekly Reports: Sprints
 The file contains the weekly targets and milestones that I worked on throughout the month of May 2022 for the project. These weekly sprints include researching about different tech-stacks, implementing code, reviewing design and testing the application in each iteration.
 
-https://drive.google.com/file/d/1bYgDNUZsmWq3-vn1qwqlIk9FR0pBzR5B/view?usp=sharing
+- [Weekly Targets Report](https://drive.google.com/file/d/1bYgDNUZsmWq3-vn1qwqlIk9FR0pBzR5B/view?usp=sharing)
+
+The learning sprint involved getting familiar with new tech stacks, and implementing a test driven development for the project.
 
 ## Future Scope:
 1. Reviewing the design to enable faster processing using multiple threads and process synchronization -> parallel processing.
