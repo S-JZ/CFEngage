@@ -146,7 +146,7 @@ class CamPolice:
         environ.Env.read_env()
         # initiating connection with SMTP server
         yag = yagmail.SMTP(env("email"), env("psw"))
-        yag.send(env("email"),f"{datetime.today()}: Violence Report from {self.area[0]}", message)
+        yag.send(env("polemail"),f"{datetime.today()}: Violence Report from {self.area[0]}", message)
     
 
     def whatsapp_authorities(self, offender_details):
